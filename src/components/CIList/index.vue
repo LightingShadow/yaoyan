@@ -1,5 +1,7 @@
 <template>
     <div class="cinema_body">
+    <Loading v-if="isLoading"></Loading>
+    <Scroller v-else>
         <ul>
             <!-- <li>
                 <div>
@@ -31,6 +33,7 @@
                 </div>
             </li>
         </ul>
+    </Scroller> 
     </div>
 </template>
 
@@ -39,14 +42,24 @@
         name: 'CIList',
         data() {
             return {
-                cinemaList: []
+                cinemaList: [],
+                isLoading: true,
+                prevCityId: -1
             }
         },
-        mounted() {
-            this.axios.get('/api/cinemaList?cityId=10').then((res)=> {
+        activated() {
+            let cityId = this.$store.state.city.id;
+            if( this.prevCityId === cityId) {
+                return;
+            }
+            this.isLoading = true;
+
+            this.axios.get('/api/cinemaList?cityId='+cityId).then((res)=> {
                 let msg = res.data.msg;
                 if(msg === 'ok') {
+                    this.isLoading = false;
                     this.cinemaList = res.data.data.cinemas;
+                    this.prevCityId = cityId;
                 }
             });
         },
